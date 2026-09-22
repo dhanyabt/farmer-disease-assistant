@@ -1,0 +1,17 @@
+{
+  "diseases": [
+    {
+      "crop": "Tomato",
+      "disease": "Early Blight",
+      "symptoms": [
+        "brown spots",
+        "dark spots",
+        "yellowing leaves",
+        "older leaves affected"
+      ],
+      "treatment": null,
+      "source": null,
+      "source_url": null
+    }
+  ]
+}
