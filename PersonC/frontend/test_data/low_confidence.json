@@ -1,0 +1,7 @@
+{
+  "disease": "Unable to determine safely",
+  "confidence": 0.31,
+  "status": "low",
+  "explanation": "The symptoms are not specific enough for a safe automated recommendation.",
+  "expert_referral": "Contact your nearest KVK agriculture expert and share this image and symptom history."
+}

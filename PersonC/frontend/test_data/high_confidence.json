@@ -1,0 +1,7 @@
+{
+  "disease": "Early blight",
+  "confidence": 0.91,
+  "status": "high",
+  "explanation": "The image and symptoms are consistent with early blight.",
+  "treatment": "Remove affected leaves, keep foliage dry, and apply an approved fungicide according to its label."
+}

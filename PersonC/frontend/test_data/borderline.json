@@ -1,0 +1,8 @@
+{
+  "disease": "Possible nutrient deficiency or leaf spot",
+  "confidence": 0.62,
+  "status": "borderline",
+  "explanation": "The available evidence overlaps two common causes.",
+  "questions": ["Are the spots spreading quickly?", "Is the newest growth also yellowing?"],
+  "treatment": "Avoid overhead watering while collecting the additional details."
+}
