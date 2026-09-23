@@ -1,7 +1,7 @@
 from pathlib import Path
 
-from quality_gate import check_image_quality
-from classifier import load_model, predict_image
+from app.ai.quality_gate import check_image_quality
+from app.ai.classifier import CONFIDENCE_THRESHOLD, classify_image
 
 
 def analyze_image(image_path: str) -> dict:
@@ -22,16 +22,15 @@ def analyze_image(image_path: str) -> dict:
             "image_quality": quality,
         }
 
-    # Step 2: Load trained disease model
-    model = load_model()
+    
 
-    # Step 3: Predict disease
-    prediction = predict_image(
+    # Step 2: Predict disease
+    prediction = classify_image(
         image_path,
-        model
+        CONFIDENCE_THRESHOLD
     )
 
-    # Step 4: Return clean output
+    # Step 3: Return clean output
     return {
         "status": "success",
         "image_quality": {

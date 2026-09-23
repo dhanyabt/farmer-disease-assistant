@@ -3,72 +3,76 @@
 This contract defines the one-day hackathon interface between Person A
 (image quality and disease classifier) and Person B (backend/orchestrator).
 
-## Person A: Image and Classification
+## Person A: Image Analysis
 
-Person A is responsible for:
+### `POST /analyze`
 
-- Checking whether the crop image is usable.
-- Classifying the crop and likely disease.
-- Returning the crop, disease, and classifier confidence.
+Person A accepts a crop or leaf image and returns image-quality results,
+classifier output, and an image-analysis decision.
 
-Person A must return this JSON shape:
+The response has this JSON shape:
 
 ```json
 {
-  "crop": "Tomato",
-  "disease": "Early Blight",
-  "confidence": 0.87
+  "quality": {
+    "accepted": true,
+    "blur_score": 641.85,
+    "width": 345,
+    "height": 490,
+    "message": "Image quality is acceptable."
+  },
+  "prediction": {
+    "crop": "Tomato",
+    "disease": "Uncertain",
+    "confidence": 0.4841
+  },
+  "decision": "REFER_TO_EXPERT",
+  "message": "Insufficient confidence for automated diagnosis."
 }
 ```
 
-`confidence` must be a numeric value from `0` to `1`, inclusive.
+The `quality` object describes whether the image is usable for analysis.
+`blur_score` is the returned image-quality score, and `width` and `height`
+are the analyzed image dimensions.
 
-Person A must not calculate the final treatment decision. Classifier
-confidence alone must never directly authorize treatment.
+The `prediction` object contains the detected crop, likely disease, and
+classifier confidence. `confidence` is a numeric value from `0` to `1`,
+inclusive.
+
+Person A's `decision` is only the classifier/image-analysis decision. Valid
+values are:
+
+- `PROCEED`: Image analysis can proceed.
+- `REFER_TO_EXPERT`: Image analysis does not provide sufficient confidence
+  for automated diagnosis.
+- `REJECT_IMAGE`: The image is not acceptable for analysis.
+
+Person A must not calculate or authorize the final application treatment
+decision. Person A's confidence and decision are inputs to Person B, not
+permission to provide treatment.
 
 ## Person B: Backend and Orchestration
 
 Person B receives:
 
-- Person A's classifier result.
+- Person A's image-analysis response, including the prediction confidence.
 - The farmer's reported symptoms.
 
 Person B then:
 
-1. Matches the farmer's symptoms against the knowledge base.
+1. Matches the farmer's symptoms against the verified knowledge base.
 2. Performs deterministic confidence gating using the classifier confidence
    and symptom match score.
-3. Selects exactly one decision: `TREATMENT`, `CLARIFY`, or `REFER`.
+3. Selects exactly one final application decision: `TREATMENT`, `CLARIFY`, or
+   `REFER`.
 
 Person B may provide a treatment only when a verified knowledge-base record
 contains both a treatment and its source. Person B must not invent treatment,
 source, disease information, or agricultural recommendations.
 
-### Decision meanings
+### Final application decision meanings
 
 - `TREATMENT`: A verified treatment and source are available.
 - `CLARIFY`: More symptom information is needed.
 - `REFER`: Confidence is too low, the disease is unknown, or no verified
   treatment and source are available.
-
-## Valid classifier output
-
-```json
-{
-  "crop": "Tomato",
-  "disease": "Early Blight",
-  "confidence": 0.87
-}
-```
-
-## Invalid classifier output
-
-The confidence value is greater than `1`, so this payload is invalid:
-
-```json
-{
-  "crop": "Tomato",
-  "disease": "Early Blight",
-  "confidence": 1.2
-}
-```
