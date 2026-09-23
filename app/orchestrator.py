@@ -1,4 +1,7 @@
 """Central deterministic orchestration for crop-disease analysis."""
+from pathlib import Path
+
+from app.ai.person_a_pipeline import analyze_image
 
 from app.clarification import calculate_symptom_match, generate_clarification_question
 from app.confidence import gate_confidence
@@ -62,4 +65,45 @@ def analyze_case(
         treatment=treatment,
         source=source,
         needs_expert=False,
+    )
+def analyze_image_case(
+    image_path: str | Path,
+    symptoms: str,
+) -> AnalysisResponse:
+    """Run Person A image analysis and pass its prediction to Person B."""
+
+    image_result = analyze_image(str(image_path))
+
+    # Person A rejected the image.
+    if image_result["status"] != "success":
+        return AnalysisResponse(
+            decision="REFER",
+            crop="Unknown",
+            disease="Unknown",
+            confidence=0.0,
+            needs_expert=True,
+        )
+
+    prediction = image_result["prediction"]
+
+    crop = prediction["crop"]
+    disease = prediction["disease"]
+    confidence = float(prediction["confidence"])
+
+    # Person A could not make a sufficiently confident prediction.
+    if crop == "Unknown" or disease == "Uncertain":
+        return AnalysisResponse(
+            decision="REFER",
+            crop=crop,
+            disease=disease,
+            confidence=confidence,
+            needs_expert=True,
+        )
+
+    # Send Person A's result into the existing Person B decision engine.
+    return analyze_case(
+        crop=crop,
+        disease=disease,
+        classifier_confidence=confidence,
+        symptoms=symptoms,
     )
